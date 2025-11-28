@@ -1,540 +1,273 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teleportation - Remote Approval for Claude Code</title>
-    <meta name="description" content="Approve AI coding changes from your phone. Work continues while you're away.">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <title>Teleportation | Unshackle Your Workflow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        void: '#050505',
+                        'nebula-purple': '#7c3aed',
+                        'deep-purple': '#4c1d95',
+                        'teal': '#0f766e',
+                        'pink': '#be185d',
+                    },
+                    animation: {
+                        'float': 'float 10s infinite ease-in-out',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                        }
+                    },
+                    boxShadow: {
+                        'glass': '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                        'glow': '0 0 30px rgba(255, 255, 255, 0.1)',
+                    },
+                    letterSpacing: {
+                        'super-wide': '0.2em',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-tertiary: #1a1a25;
-            --accent-primary: #6366f1;
-            --accent-secondary: #818cf8;
-            --accent-glow: rgba(99, 102, 241, 0.3);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: rgba(255, 255, 255, 0.08);
-            --success: #10b981;
-            --warning: #f59e0b;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Space Grotesk', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
+            background-color: #050505;
+            color: white;
             overflow-x: hidden;
         }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-        /* Animated gradient background */
-        .bg-gradient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+        .glass-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out;
             z-index: -1;
-            animation: pulse 8s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            100% { opacity: 1; }
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* Navigation */
-        nav {
-            padding: 24px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        nav .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logo span {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--text-primary);
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-secondary);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px var(--accent-glow);
-        }
-
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-secondary);
-            border-color: var(--accent-primary);
-        }
-
-        /* Hero */
-        .hero {
-            padding: 120px 0 80px;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 24px;
-        }
-
-        .hero h1 .highlight {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero .subtitle {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 40px;
-            line-height: 1.6;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        /* Code block */
-        .code-block {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            margin: 48px auto;
-            max-width: 600px;
-            text-align: left;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .code-block::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 40px;
-            background: var(--bg-tertiary);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .code-block .dots {
-            position: absolute;
-            top: 14px;
-            left: 16px;
-            display: flex;
-            gap: 8px;
-        }
-
-        .code-block .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .code-block .dot:nth-child(1) { background: #ff5f56; }
-        .code-block .dot:nth-child(2) { background: #ffbd2e; }
-        .code-block .dot:nth-child(3) { background: #27ca40; }
-
-        .code-block pre {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            line-height: 1.8;
-            margin-top: 24px;
-            color: var(--text-secondary);
-        }
-
-        .code-block .prompt {
-            color: var(--success);
-        }
-
-        .code-block .command {
-            color: var(--text-primary);
-        }
-
-        .code-block .comment {
-            color: var(--text-muted);
-        }
-
-        /* Features */
-        .features {
-            padding: 80px 0;
-        }
-
-        .features h2 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 48px;
-        }
-
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-        }
-
-        .feature-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            transition: all 0.3s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent-primary);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 16px;
-        }
-
-        .feature-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 12px;
-        }
-
-        .feature-card p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* How it works */
-        .how-it-works {
-            padding: 80px 0;
-            background: var(--bg-secondary);
-        }
-
-        .how-it-works h2 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 48px;
-        }
-
-        .flow-diagram {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 32px;
-            flex-wrap: wrap;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .flow-step {
-            text-align: center;
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .flow-step .icon {
-            width: 80px;
-            height: 80px;
-            background: var(--bg-tertiary);
-            border: 2px solid var(--accent-primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            margin: 0 auto 16px;
-        }
-
-        .flow-step h4 {
-            margin-bottom: 8px;
-        }
-
-        .flow-step p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .flow-arrow {
-            font-size: 2rem;
-            color: var(--accent-primary);
-        }
-
-        /* CTA */
-        .cta {
-            padding: 100px 0;
-            text-align: center;
-        }
-
-        .cta h2 {
-            font-size: 2.5rem;
-            margin-bottom: 16px;
-        }
-
-        .cta p {
-            color: var(--text-secondary);
-            margin-bottom: 32px;
-            font-size: 1.1rem;
-        }
-
-        /* Footer */
-        footer {
-            padding: 40px 0;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            color: var(--text-muted);
-        }
-
-        footer a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            color: var(--accent-primary);
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 32px;
-            margin-bottom: 16px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .hero {
-                padding: 80px 0 60px;
-            }
-
-            .flow-arrow {
-                display: none;
-            }
         }
     </style>
 </head>
-<body>
-    <div class="bg-gradient"></div>
+<body class="antialiased selection:bg-nebula-purple selection:text-white">
 
-    <nav>
-        <div class="container">
-            <a href="/" class="logo">🚀 <span>Teleportation</span></a>
-            <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#how-it-works">How it Works</a>
-                <a href="https://github.com/dundas/teleportation-cli">GitHub</a>
-                <a href="https://github.com/dundas/teleportation-cli#readme" class="btn btn-primary">Get Started</a>
+    <!-- Ambient Background -->
+    <div class="fixed inset-0 pointer-events-none -z-10">
+        <div class="orb top-0 left-0 w-[800px] h-[800px] bg-deep-purple/30 -translate-x-1/4 -translate-y-1/4"></div>
+        <div class="orb bottom-0 right-0 w-[600px] h-[600px] bg-teal/20 translate-x-1/4 translate-y-1/4" style="animation-delay: -2s"></div>
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 top-0 glass border-b-0 border-white/5">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full glass flex items-center justify-center">
+                        <div class="w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
+                    </div>
+                    <span class="font-light tracking-widest text-sm uppercase">Teleportation</span>
+                </div>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#features" class="text-sm text-white/60 hover:text-white transition-colors">Features</a>
+                    <a href="#how-it-works" class="text-sm text-white/60 hover:text-white transition-colors">How It Works</a>
+                    <a href="https://github.com/dundas/teleportation" class="glass-button px-6 py-2 rounded-full text-xs font-medium uppercase tracking-wide flex items-center gap-2">
+                        <i data-lucide="github" class="h-4 w-4"></i> GitHub
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <section class="hero">
-        <div class="container">
-            <h1>Approve AI changes<br><span class="highlight">from your phone</span></h1>
-            <p class="subtitle">
-                Remote approval system for Claude Code. Work continues while you're away—approve, deny, or modify AI coding changes from anywhere.
-            </p>
-            <div class="hero-buttons">
-                <a href="https://github.com/dundas/teleportation-cli" class="btn btn-primary">
-                    ⚡ Quick Install
-                </a>
-                <a href="https://github.com/dundas/teleportation-cli#readme" class="btn btn-secondary">
-                    📖 Documentation
-                </a>
+    <!-- Hero Section -->
+    <section class="relative pt-48 pb-32">
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+            
+            <!-- Left Content -->
+            <div class="space-y-10">
+                <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full glass border-white/10">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-nebula-purple opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-nebula-purple"></span>
+                    </span>
+                    <span class="text-xs font-medium tracking-wide text-white/80">v2.0 Now Available</span>
+                </div>
+
+                <h1 class="text-6xl lg:text-7xl font-thin tracking-tighter leading-[0.9]">
+                    Stop <span class="text-transparent bg-clip-text bg-gradient-to-r from-nebula-purple to-pink font-normal">Babysitting</span><br/>
+                    Your Terminal.
+                </h1>
+                
+                <p class="text-lg text-white/60 max-w-lg font-light leading-relaxed">
+                    Approve Claude Code executions from your phone. Walk away, grab a coffee, and let the work finish itself. The context follows you.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <div class="relative group w-full sm:w-auto">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-nebula-purple to-teal rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                        <div class="relative flex items-center bg-black/80 backdrop-blur-xl rounded-lg px-6 py-4 font-mono text-sm border border-white/10 text-white/80 w-full sm:w-auto">
+                            <span class="text-teal mr-3">$</span>
+                            curl -fsSL .../install.sh | sh
+                            <button class="ml-6 hover:text-white transition-colors" title="Copy">
+                                <i data-lucide="copy" class="h-4 w-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="code-block">
-                <div class="dots">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                </div>
-                <pre><span class="comment"># Install in seconds</span>
-<span class="prompt">$</span> <span class="command">curl -fsSL https://raw.githubusercontent.com/dundas/teleportation-cli/main/scripts/install.sh | bash</span>
+            <!-- Right Visual -->
+            <div class="relative h-[600px] flex items-center justify-center">
+                <!-- Background Glow -->
+                <div class="absolute inset-0 bg-nebula-purple/20 blur-[100px] rounded-full transform scale-75"></div>
 
-<span class="comment"># Enable remote approvals</span>
-<span class="prompt">$</span> <span class="command">teleportation on</span>
+                <!-- Floating Phone -->
+                <div class="relative w-72 glass rounded-[3rem] p-3 shadow-2xl transform rotate-[-5deg] hover:rotate-0 transition-transform duration-700 border border-white/20 z-10">
+                    <div class="bg-black rounded-[2.5rem] h-[550px] overflow-hidden relative border border-white/10">
+                        
+                        <!-- Screen Content -->
+                        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+                        
+                        <!-- Header -->
+                        <div class="p-6 flex justify-between items-center">
+                            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                                <div class="w-4 h-4 text-white">
+                                    <i data-lucide="menu" class="h-4 w-4"></i>
+                                </div>
+                            </div>
+                            <div class="w-8 h-8 rounded-full bg-nebula-purple shadow-[0_0_15px_rgba(124,58,237,0.5)]"></div>
+                        </div>
 
-<span class="comment"># Log in and you're ready!</span>
-<span class="prompt">$</span> <span class="command">teleportation login</span></pre>
-            </div>
-        </div>
-    </section>
+                        <!-- Center Info -->
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full px-6">
+                            <div class="w-24 h-24 rounded-full border border-white/20 mx-auto mb-6 flex items-center justify-center relative">
+                                <div class="absolute inset-0 rounded-full border border-white/10 animate-ping" style="animation-duration: 3s"></div>
+                                <i data-lucide="terminal" class="h-8 w-8 text-white/80"></i>
+                            </div>
+                            <h3 class="text-2xl font-thin mb-1">Write File</h3>
+                            <p class="text-sm text-white/40 font-mono mb-8">src/auth.ts</p>
+                            
+                            <button class="w-full glass-button h-12 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all mb-3">
+                                Approve
+                            </button>
+                            <button class="text-xs text-white/40 hover:text-white transition-colors uppercase tracking-widest">
+                                Deny
+                            </button>
+                        </div>
 
-    <section class="features" id="features">
-        <div class="container">
-            <h2>Why Teleportation?</h2>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Mobile Approvals</h3>
-                    <p>Approve or deny Claude's code changes from your phone. Get push notifications and respond in seconds.</p>
+                        <!-- Bottom Bar -->
+                        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-1/3 h-1 bg-white/20 rounded-full"></div>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🏃</div>
-                    <h3>Work Untethered</h3>
-                    <p>Step away from your desk. Claude keeps working, and you approve from anywhere—coffee shop, gym, or couch.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔐</div>
-                    <h3>Secure by Design</h3>
-                    <p>AES-256 encrypted credentials, OAuth authentication, and multi-tenant isolation. Your code stays yours.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌳</div>
-                    <h3>Session Isolation</h3>
-                    <p>Run multiple Claude sessions with worktrees. Each session has its own branch, keeping changes isolated.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📸</div>
-                    <h3>Code Snapshots</h3>
-                    <p>Create checkpoints before risky changes. Restore with one command if things go wrong.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Zero Dependencies</h3>
-                    <p>Uses only Node.js built-in modules. No npm install cascade, no security vulnerabilities from dependencies.</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <section class="how-it-works" id="how-it-works">
-        <div class="container">
-            <h2>How It Works</h2>
-            <div class="flow-diagram">
-                <div class="flow-step">
-                    <div class="icon">💻</div>
-                    <h4>Claude Code</h4>
-                    <p>Requests tool access</p>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="icon">🔗</div>
-                    <h4>Hooks Intercept</h4>
-                    <p>Request captured</p>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="icon">☁️</div>
-                    <h4>Relay API</h4>
-                    <p>Routes to your phone</p>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="icon">📱</div>
-                    <h4>You Decide</h4>
-                    <p>Approve or deny</p>
+                <!-- Floating Card Behind -->
+                <div class="absolute -right-4 top-1/3 w-64 glass rounded-xl p-4 transform rotate-[10deg] opacity-60 z-0 scale-90">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-2 h-2 bg-teal rounded-full"></div>
+                        <span class="text-xs font-mono text-white/60">Context Active</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="h-1 w-full bg-white/10 rounded-full"></div>
+                        <div class="h-1 w-2/3 bg-white/10 rounded-full"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="cta">
-        <div class="container">
-            <h2>Ready to work untethered?</h2>
-            <p>Install Teleportation in under a minute and start approving from anywhere.</p>
-            <a href="https://github.com/dundas/teleportation-cli" class="btn btn-primary">
-                🚀 Get Started Now
-            </a>
+    <!-- Features Grid -->
+    <section class="py-32 relative" id="features">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-3 gap-8">
+                
+                <!-- Feature 1 -->
+                <div class="glass p-8 rounded-2xl hover:bg-white/5 transition-colors group">
+                    <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+                        <i data-lucide="infinity" class="h-6 w-6 text-nebula-purple"></i>
+                    </div>
+                    <h3 class="text-xl font-light mb-3">Infinite Patience</h3>
+                    <p class="text-sm text-white/40 font-light leading-relaxed">
+                        Bypasses the 60s timeout. Take an hour to approve if you need to. The session waits for you, suspended in the void.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass p-8 rounded-2xl hover:bg-white/5 transition-colors group">
+                    <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+                        <i data-lucide="layers" class="h-6 w-6 text-teal"></i>
+                    </div>
+                    <h3 class="text-xl font-light mb-3">Context Preserved</h3>
+                    <p class="text-sm text-white/40 font-light leading-relaxed">
+                        Resumes your exact session state, environment variables, and working directory. Nothing is lost in transmission.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass p-8 rounded-2xl hover:bg-white/5 transition-colors group">
+                    <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+                        <i data-lucide="shield-check" class="h-6 w-6 text-pink"></i>
+                    </div>
+                    <h3 class="text-xl font-light mb-3">Secure & Local</h3>
+                    <p class="text-sm text-white/40 font-light leading-relaxed">
+                        Credentials never leave your machine. Local execution means your code stays yours.
+                    </p>
+                </div>
+
+            </div>
         </div>
     </section>
 
-    <footer>
-        <div class="container">
-            <div class="footer-links">
-                <a href="https://github.com/dundas/teleportation-cli">GitHub</a>
-                <a href="https://www.npmjs.com/package/@teleportation/cli">npm</a>
-                <a href="https://github.com/dundas/teleportation-cli#readme">Docs</a>
-                <a href="https://github.com/dundas/teleportation-cli/issues">Issues</a>
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-12 bg-black/50 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-3">
+                <div class="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center">
+                    <div class="w-2 h-2 bg-white/50 rounded-full"></div>
+                </div>
+                <span class="text-xs font-mono text-white/40 uppercase">Teleportation Protocol v2.0</span>
             </div>
-            <p>MIT License © 2025 Dundas</p>
+            <div class="flex gap-6">
+                <a href="#" class="text-white/40 hover:text-white transition-colors"><i data-lucide="github" class="h-5 w-5"></i></a>
+                <a href="#" class="text-white/40 hover:text-white transition-colors"><i data-lucide="twitter" class="h-5 w-5"></i></a>
+            </div>
         </div>
     </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
-
