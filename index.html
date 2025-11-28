@@ -1,540 +1,618 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teleportation - Remote Approval for Claude Code</title>
-    <meta name="description" content="Approve AI coding changes from your phone. Work continues while you're away.">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-tertiary: #1a1a25;
-            --accent-primary: #6366f1;
-            --accent-secondary: #818cf8;
-            --accent-glow: rgba(99, 102, 241, 0.3);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: rgba(255, 255, 255, 0.08);
-            --success: #10b981;
-            --warning: #f59e0b;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teleportation UI - Design Concept #1</title>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-        body {
-            font-family: 'Space Grotesk', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        /* Animated gradient background */
-        .bg-gradient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
-            z-index: -1;
-            animation: pulse 8s ease-in-out infinite alternate;
-        }
+    :root {
+      /* Foundation */
+      --bg-primary: #0a0e12;
+      --bg-secondary: #141922;
+      --bg-tertiary: #1e252e;
+      --surface: #252d38;
+      --border: #2d3540;
 
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            100% { opacity: 1; }
-        }
+      /* Text */
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-tertiary: #525964;
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
+      /* Semantic */
+      --approve: #3fb950;
+      --deny: #f85149;
+      --pending: #d29922;
+      --invalidated: #6e7681;
+      --accent-primary: #58a6ff;
+      --accent-neon: #79c0ff;
 
-        /* Navigation */
-        nav {
-            padding: 24px 0;
-            border-bottom: 1px solid var(--border);
-        }
+      /* Effects */
+      --glow-approve: 0 0 20px rgba(63, 185, 80, 0.3);
+      --glow-deny: 0 0 20px rgba(248, 81, 73, 0.3);
+    }
 
-        nav .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
 
-        .logo span {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    /* Header */
+    .header {
+      padding: 24px 16px;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(10, 14, 18, 0.8);
+    }
 
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
+    .header h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
 
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
+    .header .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      margin-top: 8px;
+      color: var(--text-secondary);
+    }
 
-        .nav-links a:hover {
-            color: var(--text-primary);
-        }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-neon);
+      box-shadow: 0 0 8px var(--accent-neon), 0 0 16px var(--accent-neon);
+      animation: pulse 2s ease-in-out infinite;
+    }
 
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
 
-        .btn-primary {
-            background: var(--accent-primary);
-            color: white;
-        }
+    /* Main Content */
+    .container {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
 
-        .btn-primary:hover {
-            background: var(--accent-secondary);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px var(--accent-glow);
-        }
+    .section-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-tertiary);
+      margin: 24px 0 12px;
+      font-weight: 600;
+    }
 
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
+    /* Approval Card */
+    .approval-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      margin-bottom: 16px;
+      transition: all 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
 
-        .btn-secondary:hover {
-            background: var(--bg-secondary);
-            border-color: var(--accent-primary);
-        }
+    .approval-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border-color: var(--border-bright, #3d4450);
+    }
 
-        /* Hero */
-        .hero {
-            padding: 120px 0 80px;
-            text-align: center;
-        }
+    .approval-card.beaming {
+      animation: beamOut 0.3s ease-out forwards;
+    }
 
-        .hero h1 {
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 24px;
-        }
+    @keyframes beamOut {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.95); opacity: 0.5; }
+      100% { transform: scale(0.9); opacity: 0; }
+    }
 
-        .hero h1 .highlight {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    .beam-effect {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, var(--accent-neon), transparent);
+      opacity: 0;
+      pointer-events: none;
+    }
 
-        .hero .subtitle {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 40px;
-            line-height: 1.6;
-        }
+    .approval-card.beaming .beam-effect {
+      animation: beam 0.3s ease-out;
+    }
 
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+    @keyframes beam {
+      0% { transform: translateY(-100%); opacity: 0.6; }
+      100% { transform: translateY(100%); opacity: 0; }
+    }
 
-        /* Code block */
-        .code-block {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            margin: 48px auto;
-            max-width: 600px;
-            text-align: left;
-            position: relative;
-            overflow: hidden;
-        }
+    .card-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-        .code-block::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 40px;
-            background: var(--bg-tertiary);
-            border-bottom: 1px solid var(--border);
-        }
+    .card-tool {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--accent-primary);
+    }
 
-        .code-block .dots {
-            position: absolute;
-            top: 14px;
-            left: 16px;
-            display: flex;
-            gap: 8px;
-        }
+    .card-meta {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
 
-        .code-block .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-radius: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
 
-        .code-block .dot:nth-child(1) { background: #ff5f56; }
-        .code-block .dot:nth-child(2) { background: #ffbd2e; }
-        .code-block .dot:nth-child(3) { background: #27ca40; }
+    .status-pending {
+      background: var(--pending);
+      color: #000;
+    }
 
-        .code-block pre {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            line-height: 1.8;
-            margin-top: 24px;
-            color: var(--text-secondary);
-        }
+    .card-body {
+      padding: 16px;
+    }
 
-        .code-block .prompt {
-            color: var(--success);
-        }
+    .command-preview {
+      background: #000;
+      color: #3fb950;
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--accent-primary);
+    }
 
-        .code-block .command {
-            color: var(--text-primary);
-        }
+    .command-description {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
 
-        .code-block .comment {
-            color: var(--text-muted);
-        }
+    .command-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
 
-        /* Features */
-        .features {
-            padding: 80px 0;
-        }
+    .card-actions {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      border-top: 1px solid var(--border);
+    }
 
-        .features h2 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 48px;
-        }
+    .btn {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 2px solid;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: 'JetBrains Mono', monospace;
+    }
 
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-        }
+    .btn-deny {
+      color: var(--deny);
+      border-color: var(--deny);
+    }
 
-        .feature-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            transition: all 0.3s;
-        }
+    .btn-deny:hover {
+      background: var(--deny);
+      color: #000;
+      box-shadow: var(--glow-deny);
+    }
 
-        .feature-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent-primary);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-        }
+    .btn-approve {
+      color: var(--approve);
+      border-color: var(--approve);
+    }
 
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 16px;
-        }
+    .btn-approve:hover {
+      background: var(--approve);
+      color: #000;
+      box-shadow: var(--glow-approve);
+    }
 
-        .feature-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 12px;
-        }
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+    }
 
-        .feature-card p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--border);
+    }
 
-        /* How it works */
-        .how-it-works {
-            padding: 80px 0;
-            background: var(--bg-secondary);
-        }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 24px;
+      padding-left: 16px;
+      opacity: 0;
+      animation: slideIn 0.4s ease-out forwards;
+    }
 
-        .how-it-works h2 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 48px;
-        }
+    .timeline-item:nth-child(2) { animation-delay: 0.05s; }
+    .timeline-item:nth-child(3) { animation-delay: 0.1s; }
+    .timeline-item:nth-child(4) { animation-delay: 0.15s; }
 
-        .flow-diagram {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 32px;
-            flex-wrap: wrap;
-            max-width: 900px;
-            margin: 0 auto;
-        }
+    @keyframes slideIn {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
 
-        .flow-step {
-            text-align: center;
-            flex: 1;
-            min-width: 200px;
-        }
+    .timeline-dot {
+      position: absolute;
+      left: -20px;
+      top: 4px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      box-shadow: 0 0 8px var(--accent-primary);
+    }
 
-        .flow-step .icon {
-            width: 80px;
-            height: 80px;
-            background: var(--bg-tertiary);
-            border: 2px solid var(--accent-primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            margin: 0 auto 16px;
-        }
+    .timeline-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
 
-        .flow-step h4 {
-            margin-bottom: 8px;
-        }
+    .timeline-action {
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
 
-        .flow-step p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
+    .timeline-action .approved {
+      color: var(--approve);
+    }
 
-        .flow-arrow {
-            font-size: 2rem;
-            color: var(--accent-primary);
-        }
+    .timeline-action .denied {
+      color: var(--deny);
+    }
 
-        /* CTA */
-        .cta {
-            padding: 100px 0;
-            text-align: center;
-        }
+    .timeline-command {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
 
-        .cta h2 {
-            font-size: 2.5rem;
-            margin-bottom: 16px;
-        }
+    .timeline-session {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.5px;
+    }
 
-        .cta p {
-            color: var(--text-secondary);
-            margin-bottom: 32px;
-            font-size: 1.1rem;
-        }
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(20, 25, 34, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 12px 0 env(safe-area-inset-bottom, 12px);
+    }
 
-        /* Footer */
-        footer {
-            padding: 40px 0;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            color: var(--text-muted);
-        }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      position: relative;
+      cursor: pointer;
+    }
 
-        footer a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
+    .nav-item.active {
+      color: var(--accent-primary);
+    }
 
-        footer a:hover {
-            color: var(--accent-primary);
-        }
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 32px;
+      height: 3px;
+      background: var(--accent-primary);
+      animation: slideNav 0.2s ease-out;
+    }
 
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 32px;
-            margin-bottom: 16px;
-        }
+    @keyframes slideNav {
+      from { width: 0; opacity: 0; }
+      to { width: 32px; opacity: 1; }
+    }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+    }
 
-            .hero {
-                padding: 80px 0 60px;
-            }
+    .nav-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
 
-            .flow-arrow {
-                display: none;
-            }
-        }
-    </style>
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-secondary);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    /* Hide sections */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
 </head>
 <body>
-    <div class="bg-gradient"></div>
 
-    <nav>
-        <div class="container">
-            <a href="/" class="logo">🚀 <span>Teleportation</span></a>
-            <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#how-it-works">How it Works</a>
-                <a href="https://github.com/dundas/teleportation-cli">GitHub</a>
-                <a href="https://github.com/dundas/teleportation-cli#readme" class="btn btn-primary">Get Started</a>
-            </div>
+  <!-- Header -->
+  <div class="header">
+    <h1 class="mono">TELEPORTATION</h1>
+    <div class="live-indicator">
+      <span class="live-dot"></span>
+      <span class="mono">CONNECTED</span>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+
+    <!-- Inbox Tab -->
+    <div id="inbox-tab" class="tab-content active">
+      <div class="section-title mono">Pending Approvals (2)</div>
+
+      <div class="approval-card" data-id="1">
+        <div class="beam-effect"></div>
+        <div class="card-header">
+          <div class="card-tool">
+            <span>⚡</span>
+            <span>BASH</span>
+          </div>
+          <div class="card-meta">
+            <span class="status-badge status-pending">PENDING</span>
+            <span style="margin-left: 8px;">3m ago</span>
+          </div>
         </div>
-    </nav>
-
-    <section class="hero">
-        <div class="container">
-            <h1>Approve AI changes<br><span class="highlight">from your phone</span></h1>
-            <p class="subtitle">
-                Remote approval system for Claude Code. Work continues while you're away—approve, deny, or modify AI coding changes from anywhere.
-            </p>
-            <div class="hero-buttons">
-                <a href="https://github.com/dundas/teleportation-cli" class="btn btn-primary">
-                    ⚡ Quick Install
-                </a>
-                <a href="https://github.com/dundas/teleportation-cli#readme" class="btn btn-secondary">
-                    📖 Documentation
-                </a>
-            </div>
-
-            <div class="code-block">
-                <div class="dots">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                </div>
-                <pre><span class="comment"># Install in seconds</span>
-<span class="prompt">$</span> <span class="command">curl -fsSL https://raw.githubusercontent.com/dundas/teleportation-cli/main/scripts/install.sh | bash</span>
-
-<span class="comment"># Enable remote approvals</span>
-<span class="prompt">$</span> <span class="command">teleportation on</span>
-
-<span class="comment"># Log in and you're ready!</span>
-<span class="prompt">$</span> <span class="command">teleportation login</span></pre>
-            </div>
+        <div class="card-body">
+          <div class="command-preview">$ npm test</div>
+          <div class="command-description">Run test suite</div>
+          <div class="command-path">/Users/dev/teleportation</div>
         </div>
-    </section>
+        <div class="card-actions">
+          <button class="btn btn-deny" onclick="handleDecision(1, 'deny')">Deny</button>
+          <button class="btn btn-approve" onclick="handleDecision(1, 'approve')">Approve ✓</button>
+        </div>
+      </div>
 
-    <section class="features" id="features">
-        <div class="container">
-            <h2>Why Teleportation?</h2>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Mobile Approvals</h3>
-                    <p>Approve or deny Claude's code changes from your phone. Get push notifications and respond in seconds.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🏃</div>
-                    <h3>Work Untethered</h3>
-                    <p>Step away from your desk. Claude keeps working, and you approve from anywhere—coffee shop, gym, or couch.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔐</div>
-                    <h3>Secure by Design</h3>
-                    <p>AES-256 encrypted credentials, OAuth authentication, and multi-tenant isolation. Your code stays yours.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌳</div>
-                    <h3>Session Isolation</h3>
-                    <p>Run multiple Claude sessions with worktrees. Each session has its own branch, keeping changes isolated.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📸</div>
-                    <h3>Code Snapshots</h3>
-                    <p>Create checkpoints before risky changes. Restore with one command if things go wrong.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Zero Dependencies</h3>
-                    <p>Uses only Node.js built-in modules. No npm install cascade, no security vulnerabilities from dependencies.</p>
-                </div>
+      <div class="approval-card" data-id="2">
+        <div class="beam-effect"></div>
+        <div class="card-header">
+          <div class="card-tool">
+            <span>📝</span>
+            <span>WRITE</span>
+          </div>
+          <div class="card-meta">
+            <span class="status-badge status-pending">PENDING</span>
+            <span style="margin-left: 8px;">5m ago</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="command-preview">src/components/Header.tsx</div>
+          <div class="command-description">Create new component file</div>
+          <div class="command-path">/Users/dev/teleportation</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-deny" onclick="handleDecision(2, 'deny')">Deny</button>
+          <button class="btn btn-approve" onclick="handleDecision(2, 'approve')">Approve ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline Tab -->
+    <div id="timeline-tab" class="tab-content">
+      <div class="section-title mono">Activity Timeline</div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">18:32:45</div>
+          <div class="timeline-action">⚡ BASH → <span class="approved">approved</span></div>
+          <div class="timeline-command">$ git status</div>
+          <div class="timeline-session">session-a1b2c3</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">18:28:12</div>
+          <div class="timeline-action">📝 WRITE → <span class="approved">approved</span></div>
+          <div class="timeline-command">package.json</div>
+          <div class="timeline-session">session-a1b2c3</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">18:22:03</div>
+          <div class="timeline-action">🔍 GREP → <span class="denied">denied</span></div>
+          <div class="timeline-command">search: "TODO"</div>
+          <div class="timeline-session">session-a1b2c3</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">18:15:38</div>
+          <div class="timeline-action">⚡ BASH → <span class="approved">approved</span></div>
+          <div class="timeline-command">$ npm install axios</div>
+          <div class="timeline-session">session-a1b2c3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sessions Tab -->
+    <div id="sessions-tab" class="tab-content">
+      <div class="empty-state">
+        <div class="empty-icon">📡</div>
+        <p>No active sessions</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a class="nav-item active" onclick="switchTab('inbox')" id="nav-inbox">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+      </svg>
+      <span class="nav-label">Inbox</span>
+    </a>
+    <a class="nav-item" onclick="switchTab('timeline')" id="nav-timeline">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <span class="nav-label">Timeline</span>
+    </a>
+    <a class="nav-item" onclick="switchTab('sessions')" id="nav-sessions">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>
+      <span class="nav-label">Sessions</span>
+    </a>
+  </nav>
+
+  <script>
+    // Tab Switching
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+
+      // Show selected tab
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+      document.getElementById(`nav-${tabName}`).classList.add('active');
+    }
+
+    // Handle Approval Decision
+    function handleDecision(cardId, decision) {
+      const card = document.querySelector(`.approval-card[data-id="${cardId}"]`);
+
+      // Add beaming animation
+      card.classList.add('beaming');
+
+      // Remove card after animation
+      setTimeout(() => {
+        card.style.display = 'none';
+
+        // Update count
+        const remaining = document.querySelectorAll('.approval-card').length -
+                         document.querySelectorAll('.approval-card[style*="display: none"]').length;
+        document.querySelector('.section-title').textContent = `Pending Approvals (${remaining})`;
+
+        // Show empty state if no cards left
+        if (remaining === 0) {
+          const inboxTab = document.getElementById('inbox-tab');
+          inboxTab.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">✓</div>
+              <p>All caught up!</p>
             </div>
-        </div>
-    </section>
+          `;
+        }
+      }, 300);
 
-    <section class="how-it-works" id="how-it-works">
-        <div class="container">
-            <h2>How It Works</h2>
-            <div class="flow-diagram">
-                <div class="flow-step">
-                    <div class="icon">💻</div>
-                    <h4>Claude Code</h4>
-                    <p>Requests tool access</p>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="icon">🔗</div>
-                    <h4>Hooks Intercept</h4>
-                    <p>Request captured</p>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="icon">☁️</div>
-                    <h4>Relay API</h4>
-                    <p>Routes to your phone</p>
-                </div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">
-                    <div class="icon">📱</div>
-                    <h4>You Decide</h4>
-                    <p>Approve or deny</p>
-                </div>
-            </div>
-        </div>
-    </section>
+      console.log(`Decision: ${decision} for card ${cardId}`);
+    }
 
-    <section class="cta">
-        <div class="container">
-            <h2>Ready to work untethered?</h2>
-            <p>Install Teleportation in under a minute and start approving from anywhere.</p>
-            <a href="https://github.com/dundas/teleportation-cli" class="btn btn-primary">
-                🚀 Get Started Now
-            </a>
-        </div>
-    </section>
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '1') switchTab('inbox');
+      if (e.key === '2') switchTab('timeline');
+      if (e.key === '3') switchTab('sessions');
+    });
+  </script>
 
-    <footer>
-        <div class="container">
-            <div class="footer-links">
-                <a href="https://github.com/dundas/teleportation-cli">GitHub</a>
-                <a href="https://www.npmjs.com/package/@teleportation/cli">npm</a>
-                <a href="https://github.com/dundas/teleportation-cli#readme">Docs</a>
-                <a href="https://github.com/dundas/teleportation-cli/issues">Issues</a>
-            </div>
-            <p>MIT License © 2025 Dundas</p>
-        </div>
-    </footer>
 </body>
 </html>
-
