@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teleportation - Remote Approval for Claude Code</title>
+    <meta name="description" content="Approve AI coding changes from your phone. Work continues while you're away.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --accent-primary: #6366f1;
+            --accent-secondary: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: rgba(255, 255, 255, 0.08);
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated gradient background */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+            z-index: -1;
+            animation: pulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation */
+        nav {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-primary);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Code block */
+        .code-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 48px auto;
+            max-width: 600px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .code-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-block .dots {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-block .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .code-block .dot:nth-child(1) { background: #ff5f56; }
+        .code-block .dot:nth-child(2) { background: #ffbd2e; }
+        .code-block .dot:nth-child(3) { background: #27ca40; }
+
+        .code-block pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            margin-top: 24px;
+            color: var(--text-secondary);
+        }
+
+        .code-block .prompt {
+            color: var(--success);
+        }
+
+        .code-block .command {
+            color: var(--text-primary);
+        }
+
+        .code-block .comment {
+            color: var(--text-muted);
+        }
+
+        /* Features */
+        .features {
+            padding: 80px 0;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 48px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* How it works */
+        .how-it-works {
+            padding: 80px 0;
+            background: var(--bg-secondary);
+        }
+
+        .how-it-works h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 48px;
+        }
+
+        .flow-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 32px;
+            flex-wrap: wrap;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .flow-step {
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .flow-step .icon {
+            width: 80px;
+            height: 80px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--accent-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 16px;
+        }
+
+        .flow-step h4 {
+            margin-bottom: 8px;
+        }
+
+        .flow-step p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .flow-arrow {
+            font-size: 2rem;
+            color: var(--accent-primary);
+        }
+
+        /* CTA */
+        .cta {
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .cta p {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            font-size: 1.1rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--accent-primary);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 80px 0 60px;
+            }
+
+            .flow-arrow {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">🚀 <span>Teleportation</span></a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How it Works</a>
+                <a href="https://github.com/dundas/teleportation-cli">GitHub</a>
+                <a href="https://github.com/dundas/teleportation-cli#readme" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Approve AI changes<br><span class="highlight">from your phone</span></h1>
+            <p class="subtitle">
+                Remote approval system for Claude Code. Work continues while you're away—approve, deny, or modify AI coding changes from anywhere.
+            </p>
+            <div class="hero-buttons">
+                <a href="https://github.com/dundas/teleportation-cli" class="btn btn-primary">
+                    ⚡ Quick Install
+                </a>
+                <a href="https://github.com/dundas/teleportation-cli#readme" class="btn btn-secondary">
+                    📖 Documentation
+                </a>
+            </div>
+
+            <div class="code-block">
+                <div class="dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <pre><span class="comment"># Install in seconds</span>
+<span class="prompt">$</span> <span class="command">curl -fsSL https://raw.githubusercontent.com/dundas/teleportation-cli/main/scripts/install.sh | bash</span>
+
+<span class="comment"># Enable remote approvals</span>
+<span class="prompt">$</span> <span class="command">teleportation on</span>
+
+<span class="comment"># Log in and you're ready!</span>
+<span class="prompt">$</span> <span class="command">teleportation login</span></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Why Teleportation?</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Mobile Approvals</h3>
+                    <p>Approve or deny Claude's code changes from your phone. Get push notifications and respond in seconds.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏃</div>
+                    <h3>Work Untethered</h3>
+                    <p>Step away from your desk. Claude keeps working, and you approve from anywhere—coffee shop, gym, or couch.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Secure by Design</h3>
+                    <p>AES-256 encrypted credentials, OAuth authentication, and multi-tenant isolation. Your code stays yours.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌳</div>
+                    <h3>Session Isolation</h3>
+                    <p>Run multiple Claude sessions with worktrees. Each session has its own branch, keeping changes isolated.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📸</div>
+                    <h3>Code Snapshots</h3>
+                    <p>Create checkpoints before risky changes. Restore with one command if things go wrong.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Zero Dependencies</h3>
+                    <p>Uses only Node.js built-in modules. No npm install cascade, no security vulnerabilities from dependencies.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2>How It Works</h2>
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <div class="icon">💻</div>
+                    <h4>Claude Code</h4>
+                    <p>Requests tool access</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="icon">🔗</div>
+                    <h4>Hooks Intercept</h4>
+                    <p>Request captured</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="icon">☁️</div>
+                    <h4>Relay API</h4>
+                    <p>Routes to your phone</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="icon">📱</div>
+                    <h4>You Decide</h4>
+                    <p>Approve or deny</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to work untethered?</h2>
+            <p>Install Teleportation in under a minute and start approving from anywhere.</p>
+            <a href="https://github.com/dundas/teleportation-cli" class="btn btn-primary">
+                🚀 Get Started Now
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://github.com/dundas/teleportation-cli">GitHub</a>
+                <a href="https://www.npmjs.com/package/@teleportation/cli">npm</a>
+                <a href="https://github.com/dundas/teleportation-cli#readme">Docs</a>
+                <a href="https://github.com/dundas/teleportation-cli/issues">Issues</a>
+            </div>
+            <p>MIT License © 2025 Dundas</p>
+        </div>
+    </footer>
+</body>
+</html>
+

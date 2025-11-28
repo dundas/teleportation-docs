@@ -1,0 +1,5 @@
+# Redirects for Cloudflare Pages
+/docs   https://github.com/dundas/teleportation-cli#readme   302
+/github https://github.com/dundas/teleportation-cli          302
+/npm    https://www.npmjs.com/package/@teleportation/cli     302
+

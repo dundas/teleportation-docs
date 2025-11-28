@@ -1,0 +1,11 @@
+name = "teleportation-docs"
+compatibility_date = "2024-01-01"
+
+# This is a static site - use Cloudflare Pages
+# Deploy with: npx wrangler pages deploy . --project-name=teleportation-docs
+
+# Custom domain configuration (set up in Cloudflare dashboard)
+# routes = [
+#   { pattern = "teleportation.dev", custom_domain = true }
+# ]
+
