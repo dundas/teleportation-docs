@@ -1,618 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Teleportation UI - Design Concept #1</title>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      /* Foundation */
-      --bg-primary: #0a0e12;
-      --bg-secondary: #141922;
-      --bg-tertiary: #1e252e;
-      --surface: #252d38;
-      --border: #2d3540;
-
-      /* Text */
-      --text-primary: #e6edf3;
-      --text-secondary: #8b949e;
-      --text-tertiary: #525964;
-
-      /* Semantic */
-      --approve: #3fb950;
-      --deny: #f85149;
-      --pending: #d29922;
-      --invalidated: #6e7681;
-      --accent-primary: #58a6ff;
-      --accent-neon: #79c0ff;
-
-      /* Effects */
-      --glow-approve: 0 0 20px rgba(63, 185, 80, 0.3);
-      --glow-deny: 0 0 20px rgba(248, 81, 73, 0.3);
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-      color: var(--text-primary);
-      min-height: 100vh;
-      padding-bottom: 80px;
-    }
-
-    .mono {
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* Header */
-    .header {
-      padding: 24px 16px;
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(12px);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: rgba(10, 14, 18, 0.8);
-    }
-
-    .header h1 {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    .header .live-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      margin-top: 8px;
-      color: var(--text-secondary);
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent-neon);
-      box-shadow: 0 0 8px var(--accent-neon), 0 0 16px var(--accent-neon);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.8; }
-    }
-
-    /* Main Content */
-    .container {
-      padding: 16px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .section-title {
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-tertiary);
-      margin: 24px 0 12px;
-      font-weight: 600;
-    }
-
-    /* Approval Card */
-    .approval-card {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      margin-bottom: 16px;
-      transition: all 0.15s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .approval-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      border-color: var(--border-bright, #3d4450);
-    }
-
-    .approval-card.beaming {
-      animation: beamOut 0.3s ease-out forwards;
-    }
-
-    @keyframes beamOut {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(0.95); opacity: 0.5; }
-      100% { transform: scale(0.9); opacity: 0; }
-    }
-
-    .beam-effect {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 100%;
-      background: linear-gradient(180deg, transparent, var(--accent-neon), transparent);
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .approval-card.beaming .beam-effect {
-      animation: beam 0.3s ease-out;
-    }
-
-    @keyframes beam {
-      0% { transform: translateY(-100%); opacity: 0.6; }
-      100% { transform: translateY(100%); opacity: 0; }
-    }
-
-    .card-header {
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .card-tool {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 500;
-      font-size: 14px;
-      color: var(--accent-primary);
-    }
-
-    .card-meta {
-      font-size: 12px;
-      color: var(--text-tertiary);
-    }
-
-    .status-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-radius: 2px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .status-pending {
-      background: var(--pending);
-      color: #000;
-    }
-
-    .card-body {
-      padding: 16px;
-    }
-
-    .command-preview {
-      background: #000;
-      color: #3fb950;
-      padding: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      margin-bottom: 8px;
-      border-left: 3px solid var(--accent-primary);
-    }
-
-    .command-description {
-      color: var(--text-secondary);
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
-
-    .command-path {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-tertiary);
-    }
-
-    .card-actions {
-      padding: 16px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      border-top: 1px solid var(--border);
-    }
-
-    .btn {
-      padding: 12px 24px;
-      font-size: 14px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border: 2px solid;
-      background: transparent;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .btn-deny {
-      color: var(--deny);
-      border-color: var(--deny);
-    }
-
-    .btn-deny:hover {
-      background: var(--deny);
-      color: #000;
-      box-shadow: var(--glow-deny);
-    }
-
-    .btn-approve {
-      color: var(--approve);
-      border-color: var(--approve);
-    }
-
-    .btn-approve:hover {
-      background: var(--approve);
-      color: #000;
-      box-shadow: var(--glow-approve);
-    }
-
-    /* Timeline */
-    .timeline {
-      position: relative;
-      padding-left: 24px;
-    }
-
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 4px;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background: var(--border);
-    }
-
-    .timeline-item {
-      position: relative;
-      margin-bottom: 24px;
-      padding-left: 16px;
-      opacity: 0;
-      animation: slideIn 0.4s ease-out forwards;
-    }
-
-    .timeline-item:nth-child(2) { animation-delay: 0.05s; }
-    .timeline-item:nth-child(3) { animation-delay: 0.1s; }
-    .timeline-item:nth-child(4) { animation-delay: 0.15s; }
-
-    @keyframes slideIn {
-      from { transform: translateX(-20px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    .timeline-dot {
-      position: absolute;
-      left: -20px;
-      top: 4px;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent-primary);
-      box-shadow: 0 0 8px var(--accent-primary);
-    }
-
-    .timeline-time {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-tertiary);
-      margin-bottom: 4px;
-    }
-
-    .timeline-action {
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-
-    .timeline-action .approved {
-      color: var(--approve);
-    }
-
-    .timeline-action .denied {
-      color: var(--deny);
-    }
-
-    .timeline-command {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
-    }
-
-    .timeline-session {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--text-tertiary);
-      letter-spacing: 0.5px;
-    }
-
-    /* Bottom Navigation */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(20, 25, 34, 0.95);
-      backdrop-filter: blur(12px);
-      border-top: 1px solid var(--border);
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      padding: 12px 0 env(safe-area-inset-bottom, 12px);
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      padding: 8px;
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: color 0.2s ease;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .nav-item.active {
-      color: var(--accent-primary);
-    }
-
-    .nav-item.active::after {
-      content: '';
-      position: absolute;
-      bottom: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 32px;
-      height: 3px;
-      background: var(--accent-primary);
-      animation: slideNav 0.2s ease-out;
-    }
-
-    @keyframes slideNav {
-      from { width: 0; opacity: 0; }
-      to { width: 32px; opacity: 1; }
-    }
-
-    .nav-icon {
-      width: 24px;
-      height: 24px;
-    }
-
-    .nav-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 600;
-    }
-
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 48px 16px;
-      color: var(--text-secondary);
-    }
-
-    .empty-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      opacity: 0.3;
-    }
-
-    /* Hide sections */
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Header -->
-  <div class="header">
-    <h1 class="mono">TELEPORTATION</h1>
-    <div class="live-indicator">
-      <span class="live-dot"></span>
-      <span class="mono">CONNECTED</span>
-    </div>
-  </div>
-
-  <!-- Main Container -->
-  <div class="container">
-
-    <!-- Inbox Tab -->
-    <div id="inbox-tab" class="tab-content active">
-      <div class="section-title mono">Pending Approvals (2)</div>
-
-      <div class="approval-card" data-id="1">
-        <div class="beam-effect"></div>
-        <div class="card-header">
-          <div class="card-tool">
-            <span>⚡</span>
-            <span>BASH</span>
-          </div>
-          <div class="card-meta">
-            <span class="status-badge status-pending">PENDING</span>
-            <span style="margin-left: 8px;">3m ago</span>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="command-preview">$ npm test</div>
-          <div class="command-description">Run test suite</div>
-          <div class="command-path">/Users/dev/teleportation</div>
-        </div>
-        <div class="card-actions">
-          <button class="btn btn-deny" onclick="handleDecision(1, 'deny')">Deny</button>
-          <button class="btn btn-approve" onclick="handleDecision(1, 'approve')">Approve ✓</button>
-        </div>
-      </div>
-
-      <div class="approval-card" data-id="2">
-        <div class="beam-effect"></div>
-        <div class="card-header">
-          <div class="card-tool">
-            <span>📝</span>
-            <span>WRITE</span>
-          </div>
-          <div class="card-meta">
-            <span class="status-badge status-pending">PENDING</span>
-            <span style="margin-left: 8px;">5m ago</span>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="command-preview">src/components/Header.tsx</div>
-          <div class="command-description">Create new component file</div>
-          <div class="command-path">/Users/dev/teleportation</div>
-        </div>
-        <div class="card-actions">
-          <button class="btn btn-deny" onclick="handleDecision(2, 'deny')">Deny</button>
-          <button class="btn btn-approve" onclick="handleDecision(2, 'approve')">Approve ✓</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Timeline Tab -->
-    <div id="timeline-tab" class="tab-content">
-      <div class="section-title mono">Activity Timeline</div>
-
-      <div class="timeline">
-        <div class="timeline-item">
-          <div class="timeline-dot"></div>
-          <div class="timeline-time">18:32:45</div>
-          <div class="timeline-action">⚡ BASH → <span class="approved">approved</span></div>
-          <div class="timeline-command">$ git status</div>
-          <div class="timeline-session">session-a1b2c3</div>
-        </div>
-
-        <div class="timeline-item">
-          <div class="timeline-dot"></div>
-          <div class="timeline-time">18:28:12</div>
-          <div class="timeline-action">📝 WRITE → <span class="approved">approved</span></div>
-          <div class="timeline-command">package.json</div>
-          <div class="timeline-session">session-a1b2c3</div>
-        </div>
-
-        <div class="timeline-item">
-          <div class="timeline-dot"></div>
-          <div class="timeline-time">18:22:03</div>
-          <div class="timeline-action">🔍 GREP → <span class="denied">denied</span></div>
-          <div class="timeline-command">search: "TODO"</div>
-          <div class="timeline-session">session-a1b2c3</div>
-        </div>
-
-        <div class="timeline-item">
-          <div class="timeline-dot"></div>
-          <div class="timeline-time">18:15:38</div>
-          <div class="timeline-action">⚡ BASH → <span class="approved">approved</span></div>
-          <div class="timeline-command">$ npm install axios</div>
-          <div class="timeline-session">session-a1b2c3</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sessions Tab -->
-    <div id="sessions-tab" class="tab-content">
-      <div class="empty-state">
-        <div class="empty-icon">📡</div>
-        <p>No active sessions</p>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Bottom Navigation -->
-  <nav class="bottom-nav">
-    <a class="nav-item active" onclick="switchTab('inbox')" id="nav-inbox">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-      </svg>
-      <span class="nav-label">Inbox</span>
-    </a>
-    <a class="nav-item" onclick="switchTab('timeline')" id="nav-timeline">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-      </svg>
-      <span class="nav-label">Timeline</span>
-    </a>
-    <a class="nav-item" onclick="switchTab('sessions')" id="nav-sessions">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-      </svg>
-      <span class="nav-label">Sessions</span>
-    </a>
-  </nav>
-
-  <script>
-    // Tab Switching
-    function switchTab(tabName) {
-      // Hide all tabs
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-
-      // Show selected tab
-      document.getElementById(`${tabName}-tab`).classList.add('active');
-      document.getElementById(`nav-${tabName}`).classList.add('active');
-    }
-
-    // Handle Approval Decision
-    function handleDecision(cardId, decision) {
-      const card = document.querySelector(`.approval-card[data-id="${cardId}"]`);
-
-      // Add beaming animation
-      card.classList.add('beaming');
-
-      // Remove card after animation
-      setTimeout(() => {
-        card.style.display = 'none';
-
-        // Update count
-        const remaining = document.querySelectorAll('.approval-card').length -
-                         document.querySelectorAll('.approval-card[style*="display: none"]').length;
-        document.querySelector('.section-title').textContent = `Pending Approvals (${remaining})`;
-
-        // Show empty state if no cards left
-        if (remaining === 0) {
-          const inboxTab = document.getElementById('inbox-tab');
-          inboxTab.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-icon">✓</div>
-              <p>All caught up!</p>
-            </div>
-          `;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aether // Teleportation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #000;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
         }
-      }, 300);
 
-      console.log(`Decision: ${decision} for card ${cardId}`);
-    }
+        /* Ambient Background Animation */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out;
+        }
 
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (e.key === '1') switchTab('inbox');
-      if (e.key === '2') switchTab('timeline');
-      if (e.key === '3') switchTab('sessions');
-    });
-  </script>
+        .orb-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #4c1d95; animation-delay: 0s; }
+        .orb-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #0f766e; animation-delay: -2s; }
+        .orb-3 { top: 40%; left: 30%; width: 40vw; height: 40vw; background: #be185d; animation-delay: -5s; opacity: 0.4; }
 
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* Glass Cards */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Typography */
+        .tracking-super-wide { letter-spacing: 0.2em; }
+        
+        /* Pulse Animation */
+        .pulse-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: ripple 3s infinite cubic-bezier(0, 0.2, 0.8, 1);
+        }
+
+        @keyframes ripple {
+            0% { width: 0; height: 0; opacity: 0.8; }
+            100% { width: 500px; height: 500px; opacity: 0; }
+        }
+
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center relative">
+    
+    <!-- Background Ambience -->
+    <div class="fixed inset-0 z-0">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="relative z-10 w-full max-w-md p-6 flex flex-col h-full justify-between">
+        
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center py-4 opacity-80">
+            <span class="text-xs font-light tracking-super-wide uppercase">Teleport</span>
+            <div class="w-8 h-8 rounded-full glass flex items-center justify-center text-xs">
+                K
+            </div>
+        </div>
+
+        <!-- Center Focus -->
+        <div class="flex-grow flex flex-col items-center justify-center text-center relative">
+            
+            <!-- Ripple Effect Behind -->
+            <div class="absolute flex items-center justify-center">
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring" style="animation-delay: 1s"></div>
+            </div>
+
+            <div class="relative z-10">
+                <div class="text-5xl font-thin mb-2 tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">
+                    Ready
+                </div>
+                <div class="text-sm font-light text-white/60 mb-8">
+                    MacBook Pro M3 &bull; 12 min ago
+                </div>
+
+                <!-- Session Card -->
+                <div class="glass rounded-2xl p-6 text-left w-64 mx-auto transform transition-transform hover:scale-105 duration-500 cursor-pointer group">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
+                        <span class="text-sm font-medium">Active Session</span>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                            <div class="h-full w-2/3 bg-white/80 rounded-full"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-white/50 font-light">
+                            <span>8 Files</span>
+                            <span>124 MB</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-white/10 flex -space-x-2">
+                         <div class="w-6 h-6 rounded-full bg-gray-800 border border-gray-700"></div>
+                         <div class="w-6 h-6 rounded-full bg-gray-700 border border-gray-600"></div>
+                         <div class="w-6 h-6 rounded-full bg-gray-600 border border-gray-500 flex items-center justify-center text-[8px]">+3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="space-y-4 pb-8">
+            <button class="w-full glass-button h-14 rounded-full text-sm font-medium tracking-wide uppercase flex items-center justify-center gap-2 group">
+                <span>Pull to Device</span>
+                <svg class="w-4 h-4 group-hover:translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            </button>
+            
+            <button class="w-full h-10 rounded-full text-xs font-light text-white/40 hover:text-white transition-colors">
+                Dismiss
+            </button>
+        </div>
+
+    </main>
 </body>
 </html>
